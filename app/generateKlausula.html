@@ -73,45 +73,27 @@
 
       <div class="table-responsive small">
         <table id="tableGenerateKlausula" class="table table-striped" style="width:100%">
-          <thead>
-              <tr>
-                  <th></th>
-                  <th>Klausula Name</th>
-                  <th>Category</th>
-                  <th>Version</th>
-                  <th>Description</th>
-                  <th>Action</th>
-              </tr>
-          </thead>
       </table>
         <br>
-        <div id="editor">
-          <p>Clausa Text Editor</p>
-          <p><br></p>
+        <table id="tableSelectedKlausula" class="table table-striped" width="100%">
+        </table>
+        <div class="mt-4">
+          <button class="btn btn-success m-auto w-100">Generate Klausula</button>
         </div>
+        <br>
+        <div style="display: none;">
+          <div id="editor">
+            <p>Clausa Text Editor</p>
+            <p><br></p>
+          </div>
+        </div>
+        
       </div>
       <br>
       <br>
     </main>
   </div>
 </div>
-<script src="https://cdn.tiny.cloud/1/2dmu9f5q4yjiq0ztznjc5ehk2gtwf9u0z4bvcui90b5f88il/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
-<textarea>
-  Welcome to TinyMCE!
-</textarea>
-<script>
- tinymce.init({
-   selector: 'textarea',
-   plugins: 'anchor autolink charmap codesample emoticons image link lists media searchreplace table visualblocks wordcount checklist mediaembed casechange export formatpainter pageembed linkchecker a11ychecker tinymcespellchecker permanentpen powerpaste advtable advcode editimage tinycomments tableofcontents footnotes mergetags autocorrect typography inlinecss',
-   toolbar: 'undo redo | blocks fontfamily fontsize | bold italic underline strikethrough | link image media table mergetags | addcomment showcomments | spellcheckdialog a11ycheck typography | align lineheight | checklist numlist bullist indent outdent | emoticons charmap | removeformat',
-   tinycomments_mode: 'embedded',
-   tinycomments_author: 'Author name',
-   mergetags_list: [
-     { value: 'First.Name', title: 'First Name' },
-     { value: 'Email', title: 'Email' },
-   ]
- });
-</script>
 
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>

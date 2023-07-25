@@ -147,3 +147,19 @@
 #editor {
   height: 400px;
 }
+
+table#tableGenerateKlausula.dataTable tbody tr.over td{
+  background-color: #ffa !important;
+}
+
+table#tableGenerateKlausula.dataTable tbody tr.over > .sorting_1 {
+  background-color: #ffa !important;
+}
+
+table#tableSelectedKlausula.dataTable tbody tr.over td {
+  background-color: #ffa !important;
+}
+
+table#tableSelectedKlausula.dataTable tbody tr.over > .sorting_1 {
+  background-color: #ffa !important;
+}
