@@ -11,7 +11,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css" rel="stylesheet">
     <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
     <link rel="icon" type="image/png" href="assets/favicon.png">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" integrity="sha512-nMNlpuaDPrqlEls3IX/Q56H36qvBASwb3ipuo3MxeWbsQB1881ox0cRv7UPTgBlriqoynt35KjEwgGUeUXIPnw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <link href="style.css" rel="stylesheet">
   </head>
   <body>
@@ -93,30 +93,29 @@
         <form class="row g-3">
           <input type="text" class="form-control" id="klausulaId" hidden>
           <div class="col-12">
-            <label for="klausula_title" class="form-label">Klausula Title</label>
-            <input type="text" class="form-control" id="klausula_title">
+            <label for="klausula_title" class="form-label">Klausula Title<span style="color: red;">*</span></label>
+            <input type="text" class="form-control" id="klausula_title" required>
           </div>
           <div class="col-12">
-            <label for="klausula_subtitle" class="form-label">Klausula Subtitle</label>
-            <input type="text" class="form-control" id="klausula_subtitle" placeholder="">
+            <label for="klausula_subtitle" class="form-label">Klausula Subtitle<span style="color: red;">*</span></label>
+            <input type="text" class="form-control" id="klausula_subtitle" placeholder="" required>
           </div>
           <div class="col-md-12">
-            <label for="klausula_cob" class="form-label">Class of Bussiness</label>
+            <label for="klausula_cob" class="form-label">Class of Bussiness<span style="color: red;">*</span></label>
             <select id="klausula_cob" class="form-select">
-              <option selected>Choose...</option>
+              <option value="" selected>Choose...</option>
               <option value="Marine">Marine</option>
               <option value="Fire">Fire  </option>
               <option value="KBM">KBM  </option>
             </select>
           </div>
           <div class="col-md-12">
-            <label for="klausula_category" class="form-label">Category</label>
+            <label for="klausula_category" class="form-label">Category<span style="color: red;">*</span></label>
             <select id="klausula_category" class="form-select" disabled>
-              <option selected>Select CoB First</option>
             </select>
           </div>
           <div class="col-md-12">
-            <label for="uploadPdf" class="form-label">File (*pdf)</label>
+            <label for="uploadPdf" class="form-label">File (*pdf)<span style="color: red;">*</span></label>
             <input type="file" class="form-control" id="uploadPdf" accept="application/pdf,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.wordprocessingml.document, ">
           </div>
           <div class="col-12" id="attachPreview" hidden></div>
@@ -124,7 +123,7 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-        <button type="button" class="btn btn-primary">Save</button>
+        <button id="submitBtn" type="button" class="btn btn-primary">Save</button>
       </div>
     </div>
   </div>
@@ -152,12 +151,13 @@
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
 <script type="text/javascript" src="https://cdn.datatables.net/v/dt/dt-1.10.18/datatables.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script src="https://cdn.datatables.net/1.13.5/js/jquery.dataTables.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.2.1/dist/chart.umd.min.js" integrity="sha384-gdQErvCNWvHQZj6XZM0dNsAoY4v+j5P1XDpNkcM3HJG1Yx04ecqIHk7+4VBOCHOG" crossorigin="anonymous"></script>
 <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js" integrity="sha512-2ImtlRlf2VVmiGZsjm9bEyhjGW4dU7B6TNwh/hx/iSByxNENtj3WVE6o/9Lj4TJeVXPi4bnOIMXFIJJAeufa0A==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-<script src="script.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script type="module" src="script.js"></script>
 </body>
 </html>

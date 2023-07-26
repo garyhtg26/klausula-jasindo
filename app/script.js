@@ -1,7 +1,7 @@
 
 $(document).ready( function () {
 
-var api = 'http://127.0.0.1:8000/api/'  
+var api = 'https://laraveltest.jhonyfsimbolon.com/api/'  
 var dragSrcRow = null;  // Keep track of the source row
 var selectedRows = null;   // Keep track of selected rows in the source table
 var srcTable = '';  // Global tracking of table being dragged for 'over' class setting
@@ -17,10 +17,10 @@ var klausulaId = $('#klausulaId');
 var formKlausulaModal = $('#formKlausulaModal');
 var klausula_title = $('#klausula_title');
 var klausula_subtitle = $('#klausula_subtitle');
-var klausula_cob = $('#klausula_cob');
-var klausula_category= $('#klausula_category');
-var klausula_file = $('klausula_file');
-var attachbase64 = '';
+
+var klausula_cob = $('#klausula_cob').select2();
+var klausula_category= $('#klausula_category').select2();
+var attachbase64 = ''; //klausula_file
 var uploadPdf = $('#uploadPdf');
 var uploadPdfLabel = $('#uploadPdfLabel');
 var attachPreview = $('#attachPreview');
@@ -33,25 +33,45 @@ $('#generateKlausula').click(function(e) {
 $('#tableKlausula').click(function(e) {  
     window.location.href = "tableKlausula.html";
 });
+submitBtn.click(function () {
+  if (formValidation()) {
+    saveKlausa();
+  }
+});
+$('body').on('shown.bs.modal', '.modal', function() {
+  $(this).find('select').each(function() {
+    var dropdownParent = $(document.body);
+    if ($(this).parents('.modal.in:first').length !== 0)
+      dropdownParent = $(this).parents('.modal.in:first');
+    $(this).select2({
+      dropdownParent: dropdownParent
+      // ...
+    });
+  });
+});
+formKlausulaModal.on('hidden.bs.modal', function () {
+  clearData();
+});
 
     var dataLoad = function () {
+      $('#loading').attr('hidden',false);
       var defer = $.Deferred();
       getDataKlausa()
       setTimeout(function () {
           defer.resolve();
-      }, 500);
+      }, 1500);
 
       return defer;
   };
 
   var loadThis = function () {
-
+    $('#loading').attr('hidden',true)
     var table = $('#tableGenerateKlausula').DataTable({
-      // ajax: {
-      //   url: api + 'data_klausula',
-      //   type: 'GET'
-      // },
-      data: datas,
+      ajax: {
+        url: api + 'data_klausula',
+        type: 'GET'
+      },
+      //data: datas,
       pageLength: 5,
       lengthMenu: [ 5, 10, 25, 50, 100],
       order: [[1, 'asc']],
@@ -130,7 +150,8 @@ $('#tableKlausula').click(function(e) {
             row.addEventListener('drop', handleDrop, false);
             row.addEventListener('dragend', handleDragEnd, false);
           });
-      }
+      },
+      retrieve: true,
     });
     table.on('order.dt search.dt', function () {
       table.column(1, { search: 'applied', order: 'applied' }).nodes().each(function (cell, i) {
@@ -256,7 +277,8 @@ $('#tableKlausula').click(function(e) {
             row.addEventListener('drop', handleDrop, false);
             row.addEventListener('dragend', handleDragEnd, false);
           });
-      }  
+      }  ,
+      retrieve: true,
     });
     
     table2.on('order.dt search.dt', function () {
@@ -264,6 +286,13 @@ $('#tableKlausula').click(function(e) {
           cell.innerHTML = i + 1;
       });
     }).draw();
+    $('#tableSelectedKlausula tbody').on('click', '#downloadPdf', function (e) {
+      e.stopPropagation();
+
+      var data = table2.row($(this).parents('tr')).data();
+      console.log(data);
+      window.open(data.klausula_file, '_blank').focus();
+  });
 
   function handleDragStart(e) {
     // this / e.target is the source node.
@@ -456,7 +485,7 @@ table3.on('order.dt search.dt', function () {
         removeModalId.modal('toggle');
 
         confirmRemoveBtn.click(function () {
-            deleteUser(data.UserRoleId);
+            deleteKlausula(data.id);
         });
     });
     $('#tableMasterKlausula tbody').on('click', 'tr > td:not(.select-checkbox)', function (e) {
@@ -474,7 +503,12 @@ table3.on('order.dt search.dt', function () {
       }, 250);
       if (data.klausula_file != null) {
           attachPreview.attr('hidden', false);
-          attachPreview.html(`<a href=${data.klausula_file} target=_blank> preview file attachment</a>`);
+          const contentType = 'application/pdf';
+          const b64Data = data.klausula_file;
+          
+          const blob = b64toBlob(b64Data, contentType);
+          const blobUrl = URL.createObjectURL(blob);
+          attachPreview.html(`<a href=${blobUrl} target=_blank> preview file attachment</a>`);
       } else {
           attachPreview.attr('hidden', false);
           attachPreview.html(`<p>No File Attachment</p>`);
@@ -484,7 +518,26 @@ table3.on('order.dt search.dt', function () {
           console.log('masuk')
       }
   });
-
+  const b64toBlob = (b64Data, contentType='', sliceSize=512) => {
+    const byteCharacters = atob(b64Data);
+    const byteArrays = [];
+  
+    for (let offset = 0; offset < byteCharacters.length; offset += sliceSize) {
+      const slice = byteCharacters.slice(offset, offset + sliceSize);
+  
+      const byteNumbers = new Array(slice.length);
+      for (let i = 0; i < slice.length; i++) {
+        byteNumbers[i] = slice.charCodeAt(i);
+      }
+  
+      const byteArray = new Uint8Array(byteNumbers);
+      byteArrays.push(byteArray);
+    }
+  
+    const blob = new Blob(byteArrays, {type: contentType});
+    return blob;
+  }
+  
   uploadPdf.change(function (e) {
     readMultipleFiles(this);
     var fileName = e.target.files[0].name;
@@ -494,38 +547,38 @@ table3.on('order.dt search.dt', function () {
     attachPreview.attr('hidden', false);
     attachPreview.html(`<a href=${files} target=_blank>preview</a>`);
 });
+klausula_category.append('<option value="" selected>Select CoB First</option>');
 klausula_cob.on('change', function() {
   getCategoryDropdown();
 });
 function getCategoryDropdown() {
-  if (klausula_cob.find(":selected").val()  == 'Marine') {
-    klausula_category.html('');
-    klausula_category.attr('disabled', false);
-    klausula_category.append('<option value="Deductible Clause" disabled selected>Deductible Clause</option>');
-    klausula_category.append('<option value="Charge Clause" disabled selected>Charge Clause</option>');
-    
-  } else if (klausula_cob.find(":selected").val() == 'Fire') {
-    klausula_category.html('');
+  klausula_category.html('');
   klausula_category.attr('disabled', false);
-    klausula_category.append('<option value="Agreement Clause" disabled selected>Agreement Clause</option>');
-    klausula_category.append('<option value="Accountant Clause" disabled selected>Accountant Clause</option>');
-  } else if (klausula_cob.find(":selected").val()  == 'KBM') {
-    klausula_category.html('');
-  klausula_category.attr('disabled', false);
-    klausula_category.append('<option value="Arbitrase" disabled selected>Arbitrase</option>');
-    klausula_category.append('<option value="Abandoment or Wreckage" disabled selected>Abandoment or Wreckage</option>');
+  if (klausula_cob.val()  == 'Marine') {
+    klausula_category.append('  <option value="" selected>Choose...</option>');
+    klausula_category.append('<option value="Deductible Clause" >Deductible Clause</option>');
+    klausula_category.append('<option value="Charge Clause">Charge Clause</option>');
+  } else if (klausula_cob.val() == 'Fire') {
+    klausula_category.append('  <option value="" selected>Choose...</option>');
+    klausula_category.append('<option value="Agreement Clause" >Agreement Clause</option>');
+    klausula_category.append('<option value="Accountant Clause" >Accountant Clause</option>');
+  } else if (klausula_cob.val()  == 'KBM') {
+    klausula_category.append('  <option value="" selected>Choose...</option>');
+    klausula_category.append('<option value="Arbitrase" >Arbitrase</option>');
+    klausula_category.append('<option value="Abandoment or Wreckage" >Abandoment or Wreckage</option>');
   } 
  
 }
 function saveKlausa() {
 
   var request = {
-      visitorTrafficData: {
-          VisitorTrafficId: visitorTrafficId.val(),
-          Month: visitorMonth.val(),
-          Year: visitorYear.val(),
-          DataAttach: attachbase64
-      }
+          id: klausulaId.val(),
+          klausula_title: klausula_title.val(),
+          klausula_subtitle: klausula_subtitle.val(),
+          klausula_cob: klausula_cob.val(),
+          klausula_category: klausula_category.val(),
+          klausula_file: attachbase64
+      
   }
 
   console.log(request);
@@ -534,67 +587,79 @@ function saveKlausa() {
 
   submitBtn.attr('disabled', true);
   submitBtn.text('Loading..');
-
-  $.post(baseUrl + 'Tenant/SaveVisitorTraffic', request, function (data) {
+  
+  $.post(api + 'data_klausula', request, function (data) {
       console.log(data);
 
       if (data != null) {
-          if (data.Code == 0) {
+          if (data.status) {
 
               submitBtn.text(btnText);
               submitBtn.attr('disabled', false);
 
-              visitorFormModal.modal('toggle');
+              formKlausulaModal.modal('toggle');
 
-              customAlert(data.Code, data.Message);
+              customAlert(2, data.message);
+              
 
           } else {
-              customAlert(data.Code, data.Message);
-
+              customAlert(1, data.message);
+              formKlausulaModal.modal('toggle');
               submitBtn.text(btnText);
               submitBtn.attr('disabled', false);
           }
       } else {
-          customAlert(1, 'Unexpected Error');
+          alert('unexpected error');
 
           submitBtn.text(btnText);
           submitBtn.attr('disabled', false);
       }
   });
 }
-  function deleteUser(userRoleId) {
+  function deleteKlausula(id) {
 
-    var request = {
-        UserRoleId: userRoleId
-    }
+    $.ajax({
+      type: "GET",
+      url: api + "data_klausula_delete/"+id,
+      contentType: "application/json; charset=utf-8",
+      crossDomain: true,
+      success: function (data, status, jqXHR) {
 
-    console.log(request);
+          alert("success");// write success in " "
+          location.reload();
 
-    $.post(baseUrl + 'User/DeleteUser', request, function (data) {
-        console.log(data);
+      },
 
-        if (data != null) {
-            if (data.Code == 0) {
-                customAlert(data.Code, data.Message);
-            } else {
-                customAlert(data.Code, data.Message);
-            }
-        } else {
-            customAlert(1, 'Unexpected Error');
-        }
-    });
+      error: function (jqXHR, status) {
+          // error handler
+          console.log(jqXHR);
+          alert('fail ' + status.code);
+      }
+   });
 }
 function formValidation() {
-  if (yearDropdownId.val() == null) {
-      customAlert(1, "Visitor year must selected");
+
+  if (klausula_title.val() == null || klausula_title.val() == '') {
+     customAlert(1, "Klausula title must be fill");
       return false;
   }
+  if (klausula_subtitle.val() == null || klausula_subtitle.val() == '') {
+    customAlert(1, "Klausula subtitle must be fill");
+    return false;
+}
+if (klausula_cob.val() == null || klausula_cob.val() == '') {
+  customAlert(1, "Class of Bussiness must selected");
+  return false;
+}
 
-  if (visitorMonth.val() == null) {
-      customAlert(1, "Visitor month must selected");
+  if (klausula_category.val() == null || klausula_category.val() == '') {
+      customAlert(1, "Category must selected");
       return false;
   }
-
+  if (uploadPdf.val() == null || uploadPdf.val() == '') {
+    customAlert(1, "File PDF cannot be empty");
+    return false;
+}
   return true;
 }
 
@@ -604,16 +669,34 @@ function readMultipleFiles(element) {
   reader.onloadend = function () {
       attachbase64 = reader.result.split(',')[1];
   }
+  console.log(reader)
   reader.readAsDataURL(file);
 
 }
 function clearData() {
-  visitorTrafficId.val('');
-  //visitorYear.val(null).trigger('change');
-  visitorMonth.val(null).trigger('change');
+  klausula_title.val('');
+  klausula_subtitle.val('');
+  klausula_cob.val(null).trigger('change');
+  klausula_category.append(' <option value="" selected>Select CoB First</option>');
+  klausula_category.val(null).trigger('change');
+  klausula_category.attr('disabled',true);
   uploadPdfLabel.html('-- Choose File --');
   uploadPdf.val('');
   attachPreview.attr('hidden', true);
 }
-  
-  });
+
+function customAlert(i,text){
+  var icon;
+  if (i ==1){
+    icon = 'error'
+  } else {
+    icon ='success'
+  }
+  Swal.fire({
+    title: text,
+    icon: icon,
+    confirmButtonText: 'ok'
+  })
+}
+
+});
