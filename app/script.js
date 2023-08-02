@@ -8,7 +8,8 @@ var srcTable = '';  // Global tracking of table being dragged for 'over' class s
 var rows = [];   // Global rows for #tableGenerateKlausula
 var rows2 = [];  // Global rows for #tableSelectedKlausula
 var datas = [];
-
+var selectedKlausula = []; //
+var tableSelectedKlausula = $('#tableSelectedKlausula')
 var removeModalId = $('#removeModal');
 var removeModalBodyId = $('#removeModalBody');
 var confirmRemoveBtn = $('#confirmRemoveBtn');
@@ -16,7 +17,7 @@ var confirmRemoveBtn = $('#confirmRemoveBtn');
 var klausulaId = $('#klausulaId');
 var formKlausulaModal = $('#formKlausulaModal');
 var klausula_title = $('#klausula_title');
-var klausula_subtitle = $('#klausula_subtitle');
+var klausula_deskripsi = $('#klausula_deskripsi');
 
 var klausula_cob = $('#klausula_cob').select2();
 var klausula_category= $('#klausula_category').select2();
@@ -26,6 +27,10 @@ var uploadPdfLabel = $('#uploadPdfLabel');
 var attachPreview = $('#attachPreview');
 var submitBtn = $('#submitBtn');
 
+var myTextarea = $('#myTextarea');
+var tempContent;
+var klausulaWording = $('#klausulaWording')
+
 $('#generateKlausula').click(function(e) {  
     window.location.href = "generateKlausula.html";
 });
@@ -33,10 +38,32 @@ $('#generateKlausula').click(function(e) {
 $('#tableKlausula').click(function(e) {  
     window.location.href = "tableKlausula.html";
 });
+
+$('#generateBtn').click(function(e){
+      e.preventDefault()
+      if(table2 .rows().count() === 0){
+        customAlert(1,'Please select klausula')
+      } else {
+        $('#tableSelectedKlausula > tbody > tr:nth-child(n) > td:nth-child(6)').each(function() {
+        
+          selectedKlausula.push($(this).html());
+          console.log(selectedKlausula)
+          sessionStorage.setItem('selectedKlausulaArray', selectedKlausula);
+          window.location.href = "printKlausula.html";
+     
+        });
+      }
+
+});
 submitBtn.click(function () {
-  if (formValidation()) {
-    saveKlausa();
+  if(klausulaId.val() == null || klausulaId.val() == ''){
+    if (formValidation()) {
+      saveKlausa();
+    }
+  } else {
+    editKlausula(klausulaId.val());
   }
+ 
 });
 $('body').on('shown.bs.modal', '.modal', function() {
   $(this).find('select').each(function() {
@@ -59,7 +86,7 @@ formKlausulaModal.on('hidden.bs.modal', function () {
       getDataKlausa()
       setTimeout(function () {
           defer.resolve();
-      }, 1500);
+      }, 1000);
 
       return defer;
   };
@@ -99,8 +126,8 @@ formKlausulaModal.on('hidden.bs.modal', function () {
         }, 
         {
             //3
-            data: 'klausula_subtitle',
-            title: 'Klausula Subtitle',
+            data: 'klausula_deskripsi',
+            title: 'Klausula Description',
             className: 'exportable'
         },
         {
@@ -109,12 +136,17 @@ formKlausulaModal.on('hidden.bs.modal', function () {
             title: 'Cob',
             className: 'exportable'
         },
+        // {
+        //     //5
+        //     data: 'klausula_category',
+        //     title: 'Category',
+        //     className: 'exportable'
+        // },
         {
-            //5
-            data: 'klausula_category',
-            title: 'Category',
-            className: 'exportable'
-        },
+          //6
+          data: 'klausula_wording',
+          className: 'hidden'
+      },
         {
           data: null,
           title: '',
@@ -164,7 +196,12 @@ formKlausulaModal.on('hidden.bs.modal', function () {
 
       var data = table.row($(this).parents('tr')).data();
       console.log(data);
-      window.open(data.klausula_file, '_blank').focus();
+      const contentType = 'application/pdf';
+          const b64Data = data.klausula_file;
+          
+          const blob = b64toBlob(b64Data, contentType);
+          const blobUrl = URL.createObjectURL(blob);
+      window.open(blobUrl, '_blank').focus();
   });
 
   };
@@ -221,8 +258,8 @@ formKlausulaModal.on('hidden.bs.modal', function () {
         }, 
         {
             //3
-            data: 'klausula_subtitle',
-            title: 'Klausula Subtitle',
+            data: 'klausula_deskripsi',
+            title: 'Klausula Description',
             className: 'exportable'
         },
         {
@@ -231,21 +268,26 @@ formKlausulaModal.on('hidden.bs.modal', function () {
             title: 'Cob',
             className: 'exportable'
         },
+        // {
+        //     //5
+        //     data: 'klausula_category',
+        //     title: 'Category',
+        //     className: 'exportable'
+        // },
         {
-            //5
-            data: 'klausula_category',
-            title: 'Category',
-            className: 'exportable'
-        },
+          //6
+          data: 'klausula_wording',
+          className: 'hidden'
+      },
         {
           data: null,
           title: '',
           orderable: false,
           searchable: false,
           defaultContent: `<div class="d-flex">
-                   <a type="button" class="btn btn-sm btn-primary" title="Download" id="downloadPdf">
+                   <button type="button" class="btn btn-sm btn-primary" title="Download" disabled id="downloadPdf2">
                        <i class="fas fa-file-pdf mr-2"></i>Download
-                   </a>
+                   </button>
               </div>`
       }
     ],
@@ -286,11 +328,12 @@ formKlausulaModal.on('hidden.bs.modal', function () {
           cell.innerHTML = i + 1;
       });
     }).draw();
-    $('#tableSelectedKlausula tbody').on('click', '#downloadPdf', function (e) {
+    $('#tableSelectedKlausula tbody').on('click', '#downloadPdf2', function (e) {
       e.stopPropagation();
 
       var data = table2.row($(this).parents('tr')).data();
       console.log(data);
+      
       window.open(data.klausula_file, '_blank').focus();
   });
 
@@ -371,7 +414,7 @@ formKlausulaModal.on('hidden.bs.modal', function () {
   
         // Get source transfer data
         var srcData = e.dataTransfer.getData('text/plain');
-  
+        
         // Add row to destination Datatable
         $('#' + dstTable).DataTable().row.add($(srcData)).draw();
   
@@ -436,8 +479,8 @@ var table3 = $('#tableMasterKlausula').DataTable({
     }, 
     {
         //3
-        data: 'klausula_subtitle',
-        title: 'Klausula Subtitle',
+        data: 'klausula_deskripsi',
+        title: 'Klausula Description',
         className: 'exportable'
     },
     {
@@ -446,12 +489,12 @@ var table3 = $('#tableMasterKlausula').DataTable({
         title: 'Cob',
         className: 'exportable'
     },
-    {
-        //5
-        data: 'klausula_category',
-        title: 'Category',
-        className: 'exportable'
-    },
+    // {
+    //     //5
+    //     data: 'klausula_category',
+    //     title: 'Category',
+    //     className: 'exportable'
+    // },
     {
       data: null,
       title: '',
@@ -481,7 +524,7 @@ table3.on('order.dt search.dt', function () {
 
         var data = table3.row($(this).parents('tr')).data();
         console.log(data);
-        removeModalBodyId.html(`Are you sure you want to remove <b>${data.klausula_title}</b> kalusula from  <b>${data.klausula_category}</b> in <b>${data.klausula_cob}</b> CoB?`);
+        removeModalBodyId.html(`Are you sure you want to remove <b>${data.klausula_title}</b> kalusula from <b>${data.klausula_cob}</b> CoB?`);
         removeModalId.modal('toggle');
 
         confirmRemoveBtn.click(function () {
@@ -494,14 +537,15 @@ table3.on('order.dt search.dt', function () {
       var data = table3.row($(this).parents('tr')).data();
       console.log(data);
       klausula_title.val(data.klausula_title);
-      klausula_subtitle.val(data.klausula_subtitle)
+      klausula_deskripsi.val(data.klausula_deskripsi)
       klausulaId.val(data.id);
       klausula_cob.val(data.klausula_cob).trigger('change');
-
-      setTimeout(function () {
-        klausula_category.val(data.klausula_category).trigger('change');
-      }, 250);
+      tinymce.activeEditor.setContent(data.klausula_wording, {format: 'raw'})
+      // setTimeout(function () {
+      //   klausula_category.val(data.klausula_category).trigger('change');
+      // }, 250);
       if (data.klausula_file != null) {
+          
           attachPreview.attr('hidden', false);
           const contentType = 'application/pdf';
           const b64Data = data.klausula_file;
@@ -547,10 +591,10 @@ table3.on('order.dt search.dt', function () {
     attachPreview.attr('hidden', false);
     attachPreview.html(`<a href=${files} target=_blank>preview</a>`);
 });
-klausula_category.append('<option value="" selected>Select CoB First</option>');
-klausula_cob.on('change', function() {
-  getCategoryDropdown();
-});
+// klausula_category.append('<option value="" selected>Select CoB First</option>');
+// klausula_cob.on('change', function() {
+//   getCategoryDropdown();
+// });
 function getCategoryDropdown() {
   klausula_category.html('');
   klausula_category.attr('disabled', false);
@@ -574,10 +618,11 @@ function saveKlausa() {
   var request = {
           id: klausulaId.val(),
           klausula_title: klausula_title.val(),
-          klausula_subtitle: klausula_subtitle.val(),
+          klausula_deskripsi: klausula_deskripsi.val(),
           klausula_cob: klausula_cob.val(),
-          klausula_category: klausula_category.val(),
-          klausula_file: attachbase64
+          // klausula_category: klausula_category.val(),
+          klausula_file: attachbase64,
+          klausula_wording: tinyMCE.activeEditor.getContent()
       
   }
 
@@ -599,7 +644,73 @@ function saveKlausa() {
 
               formKlausulaModal.modal('toggle');
 
-              customAlert(2, data.message);
+              customAlert(0, data.message, true);
+              
+
+          } else {
+              customAlert(1, data.message);
+              formKlausulaModal.modal('toggle');
+              submitBtn.text(btnText);
+              submitBtn.attr('disabled', false);
+          }
+      } else {
+        customAlert(1, 'Unexpected error');
+
+          submitBtn.text(btnText);
+          submitBtn.attr('disabled', false);
+      }
+  });
+}
+  function deleteKlausula(id) {
+
+    $.ajax({
+      type: "GET",
+      url: api + "data_klausula_delete/"+id,
+      contentType: "application/json; charset=utf-8",
+      crossDomain: true,
+      success: function (data, status, jqXHR) {
+
+        customAlert(0, 'Data berhasil di delete', true);
+
+      },
+
+      error: function (jqXHR, status) {
+          // error handler
+          console.log(jqXHR);
+          customAlert(1, 'Unexpected error');
+      }
+   });
+}
+function editKlausula(id) {
+
+  var request = {
+          klausula_title: klausula_title.val(),
+          klausula_deskripsi: klausula_deskripsi.val(),
+          klausula_cob: klausula_cob.val(),
+          klausula_file: attachbase64,
+          klausula_wording: tinyMCE.activeEditor.getContent()
+      
+  }
+
+  console.log(request);
+
+  var btnText = submitBtn.text();
+
+  submitBtn.attr('disabled', true);
+  submitBtn.text('Loading..');
+  
+  $.post(api + 'data_klausula/'+id, request, function (data) {
+      console.log(data);
+
+      if (data != null) {
+          if (data.status) {
+
+              submitBtn.text(btnText);
+              submitBtn.attr('disabled', false);
+
+              formKlausulaModal.modal('toggle');
+
+              customAlert(0, data.message , true);
               
 
           } else {
@@ -616,35 +727,14 @@ function saveKlausa() {
       }
   });
 }
-  function deleteKlausula(id) {
-
-    $.ajax({
-      type: "GET",
-      url: api + "data_klausula_delete/"+id,
-      contentType: "application/json; charset=utf-8",
-      crossDomain: true,
-      success: function (data, status, jqXHR) {
-
-          alert("success");// write success in " "
-          location.reload();
-
-      },
-
-      error: function (jqXHR, status) {
-          // error handler
-          console.log(jqXHR);
-          alert('fail ' + status.code);
-      }
-   });
-}
 function formValidation() {
 
   if (klausula_title.val() == null || klausula_title.val() == '') {
      customAlert(1, "Klausula title must be fill");
       return false;
   }
-  if (klausula_subtitle.val() == null || klausula_subtitle.val() == '') {
-    customAlert(1, "Klausula subtitle must be fill");
+  if (klausula_deskripsi.val() == null || klausula_deskripsi.val() == '') {
+    customAlert(1, "Klausula Description must be fill");
     return false;
 }
 if (klausula_cob.val() == null || klausula_cob.val() == '') {
@@ -652,14 +742,18 @@ if (klausula_cob.val() == null || klausula_cob.val() == '') {
   return false;
 }
 
-  if (klausula_category.val() == null || klausula_category.val() == '') {
-      customAlert(1, "Category must selected");
-      return false;
+  // if (klausula_category.val() == null || klausula_category.val() == '') {
+  //     customAlert(1, "Category must selected");
+  //     return false;
+  // }
+//   if (uploadPdf.val() == null || uploadPdf.val() == '') {
+//     customAlert(1, "File PDF cannot be empty");
+//     return false;
+// }
+  if (tinyMCE.activeEditor.getContent() == null || tinyMCE.activeEditor.getContent() == ''){
+    customAlert(1, "Wording cannot be empty");
+    return false
   }
-  if (uploadPdf.val() == null || uploadPdf.val() == '') {
-    customAlert(1, "File PDF cannot be empty");
-    return false;
-}
   return true;
 }
 
@@ -675,28 +769,62 @@ function readMultipleFiles(element) {
 }
 function clearData() {
   klausula_title.val('');
-  klausula_subtitle.val('');
+  klausula_deskripsi.val('');
   klausula_cob.val(null).trigger('change');
-  klausula_category.append(' <option value="" selected>Select CoB First</option>');
-  klausula_category.val(null).trigger('change');
-  klausula_category.attr('disabled',true);
+  // klausula_category.append(' <option value="" selected>Select CoB First</option>');
+  // klausula_category.val(null).trigger('change');
+  // klausula_category.attr('disabled',true);
   uploadPdfLabel.html('-- Choose File --');
   uploadPdf.val('');
   attachPreview.attr('hidden', true);
 }
 
-function customAlert(i,text){
-  var icon;
-  if (i ==1){
-    icon = 'error'
-  } else {
-    icon ='success'
-  }
+function customAlert(i,text,reload){
+  var icon = 'error';
+
+    if (i == 0) {
+        icon = 'success';
+    } else if (i == 2) {
+        icon = 'warning';
+    }
+
   Swal.fire({
     title: text,
     icon: icon,
     confirmButtonText: 'ok'
-  })
+  }).then((result) => {
+    // Reload the Page
+    if(reload){
+      location.reload();
+    }
+  });
 }
+
+//editor
+
+tinymce.init({
+  selector: 'textarea',
+  height : "500",
+  plugins: 'save tinycomments mentions anchor autolink charmap codesample emoticons image link lists media searchreplace table visualblocks wordcount checklist mediaembed casechange export formatpainter pageembed permanentpen footnotes advtemplate advtable advcode editimage tableofcontents mergetags powerpaste tinymcespellchecker autocorrect a11ychecker typography inlinecss',
+  toolbar: ' undo redo | blocks fontfamily fontsize | bold italic underline strikethrough | link image media table mergetags | align lineheight | tinycomments | checklist numlist bullist indent outdent | emoticons charmap | removeformat',
+  tinycomments_mode: 'embedded',
+  tinycomments_author: 'Author name',
+  mergetags_list: [
+    { value: 'First.Name', title: 'First Name' },
+    { value: 'Email', title: 'Email' },
+  ],
+});
+var myContent = tinymce.get("myTextarea").getContent();
+console.log(myContent)
+
+$('#submitWording').click(function(e){
+  // $('#containerGenerate').attr('src',)
+ // tinymce.activeEditor.execCommand('mceSave');
+
+  tempContent = tinyMCE.activeEditor.getContent();
+  console.log(tempContent)
+  localStorage.setItem("content", tempContent);
+  
+});
 
 });

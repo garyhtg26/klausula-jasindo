@@ -186,3 +186,60 @@ table#tableSelectedKlausula.dataTable tbody tr.over > .sorting_1 {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
 }
+
+#klausulaBody{
+ /* box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23); */
+  text-align: -webkit-center;
+}
+
+.hidden {
+  display: none !important;
+}
+
+.header, .header-space,
+.footer, .footer-space {
+  height: 100px;
+}
+.header {
+  position: fixed;
+  text-align: right;
+  top: 0;
+}
+.content {
+  padding: 0 7%;
+}
+.footer {
+  position: fixed;
+  bottom: 0;
+  
+}
+
+#page-number {
+  margin-top: 35%;
+  margin-left: 20%;
+}
+
+/* #page-number:after {
+  counter-increment: page_number;
+  content: "Page " counter(page_number);
+} */
+
+.title-clauses {
+  margin-left: 20%;
+  margin-bottom: 5%;
+  font-weight: 600;
+    text-transform: uppercase;
+}
+
+#tableGenerateKlausula th {
+  font-family: inherit;
+    
+    color: #fff;
+    line-height: 1.4;
+    background-color: #6c7ae0;
+}
+
+#tableGenerateKlausula.table-striped>tbody>tr:nth-of-type(odd)>* {
+
+  --bs-table-bg-type: #f8f6ff !important;
+}
