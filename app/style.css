@@ -236,10 +236,18 @@ table#tableSelectedKlausula.dataTable tbody tr.over > .sorting_1 {
     
     color: #fff;
     line-height: 1.4;
-    background-color: #6c7ae0;
+    background-color: #F58216;
 }
 
-#tableGenerateKlausula.table-striped>tbody>tr:nth-of-type(odd)>* {
-
-  --bs-table-bg-type: #f8f6ff !important;
+#tableSelectedKlausula th {
+  font-family: inherit;
+    
+    color: #fff;
+    line-height: 1.4;
+    background-color: #16558F;
 }
+
+/* #tableGenerateKlausula.table-striped>tbody>tr:nth-of-type(odd)>* {
+
+  --bs-table-bg-type: #f9dfba !important;
+} */
